@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mundial 2026 · Precios</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: 100vw; height: 100vh; overflow: hidden;
+  background: #FFFAF0;
+  font-family: 'Noto Serif', Georgia, serif;
+  color: #111;
+}
+
+/* ── SCREENS ── */
+.screen {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: clamp(8px, 1.2vh, 26px);
+  opacity: 0; pointer-events: none;
+  background: #FFFAF0;
+  padding: clamp(10px, 1.5vh, 32px) clamp(20px, 2.5vw, 100px) clamp(50px, 5vh, 110px);
+  transition: opacity 1.6s cubic-bezier(.4,0,.2,1);
+}
+.screen.active { opacity: 1; pointer-events: all; }
+.screen.cut-in  { transition: opacity 0s; }
+.screen.cut-out { transition: opacity 0s; }
+
+/* ── COVER ── */
+#s-cover { padding: 0; cursor: pointer; }
+#s-cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* ── TITLE ── */
+.screen-title {
+  font-family: 'Noto Serif', Georgia, serif;
+  /* 4K optimized: ~120px on 2160px screen */
+  font-size: clamp(2rem, 5.6vh, 10rem);
+  font-weight: 700;
+  color: #111;
+  text-align: center;
+  line-height: 1.2;
+  max-width: 86vw;
+  opacity: 0;
+  transform: translateY(clamp(4px, 0.4vh, 12px));
+  transition: opacity 1s ease .4s, transform 1s ease .4s;
+}
+.screen.active .screen-title { opacity: 1; transform: translateY(0); }
+.screen.cut-in .screen-title { transition: none; opacity: 1; transform: translateY(0); }
+.screen-title .hl { color: #e05c3a; }
+
+/* ── VIDEO ── */
+.video-wrap {
+  width: 88vw; flex: 1; min-height: 0;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: clamp(4px, 0.3vw, 12px); overflow: hidden;
+  background: #FFFAF0;
+}
+.video-wrap video {
+  width: 100%; height: 100%;
+  object-fit: contain; display: block;
+}
+video::-webkit-media-controls,
+video::-webkit-media-controls-enclosure,
+video::-webkit-media-controls-panel { display: none !important; }
+
+/* ── NAV BUTTON ── */
+#nav-btn {
+  position: fixed;
+  bottom: clamp(16px, 2vh, 60px);
+  right: clamp(20px, 2vw, 80px);
+  width: clamp(60px, 4vw, 130px);
+  height: clamp(60px, 4vw, 130px);
+  border-radius: 50%;
+  background: #111; border: none; color: #fff;
+  font-size: clamp(28px, 2vw, 64px);
+  cursor: pointer; z-index: 300;
+  display: flex; align-items: center; justify-content: center;
+  transition: transform .15s, opacity .4s;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow: 0 clamp(2px, 0.3vw, 8px) clamp(10px, 1.2vw, 36px) rgba(0,0,0,.18);
+  opacity: 0; pointer-events: none;
+}
+#nav-btn.show { opacity: 1; pointer-events: all; }
+#nav-btn:active { transform: scale(.88); }
+
+/* ── DOTS ── */
+.progress {
+  position: fixed;
+  bottom: clamp(24px, 2.8vh, 80px);
+  left: 50%; transform: translateX(-50%);
+  display: flex;
+  gap: clamp(10px, 0.8vw, 28px);
+  z-index: 300; align-items: center;
+  opacity: 0; transition: opacity .6s;
+}
+.progress.show { opacity: 1; }
+.pdot {
+  width: clamp(8px, 0.6vw, 20px);
+  height: clamp(8px, 0.6vw, 20px);
+  border-radius: 50%;
+  background: #ccc;
+  transition: background .4s, transform .4s;
+  cursor: pointer;
+}
+.pdot.active { background: #111; transform: scale(1.5); }
+.pdot.done   { background: #888; }
+</style>
+</head>
+<body>
+
+<div class="progress" id="dots"></div>
+<button id="nav-btn" onclick="advance()">›</button>
+
+<!-- PORTADA -->
+<div class="screen active" id="s-cover" onclick="goTo(1)">
+  <img src="portada.png" alt="N+ nmas.com.mx">
+</div>
+
+<!-- 1 -->
+<div class="screen" id="s0">
+  <h1 class="screen-title">Precios de hospedaje durante el torneo cotizados en <span class="hl">enero</span></h1>
+  <div class="video-wrap"><video id="v0" src="video1.webm" playsinline preload="auto" muted></video></div>
+</div>
+
+<!-- 2: zoom in -->
+<div class="screen" id="s1">
+  <h1 class="screen-title">Precios de hospedaje durante el torneo cotizados en <span class="hl">enero</span></h1>
+  <div class="video-wrap"><video id="v1" src="video2.webm" playsinline preload="auto" muted></video></div>
+</div>
+
+<!-- 3: zoom out — cut transition from s1 -->
+<div class="screen" id="s2">
+  <h1 class="screen-title">Precios de hospedaje durante el torneo cotizados en <span class="hl">enero</span></h1>
+  <div class="video-wrap" style="position:relative;left:5px"><video id="v2" src="video3.webm" playsinline preload="auto" muted></video></div>
+</div>
+
+<!-- 4 -->
+<div class="screen" id="s3">
+  <h1 class="screen-title">Precios de hospedaje durante el torneo cotizados en <span class="hl">mayo</span></h1>
+  <div class="video-wrap"><video id="v3" src="video4.webm" playsinline preload="auto" muted></video></div>
+</div>
+
+<!-- 5: disponibilidad con 3 videos secuenciales -->
+<div class="screen" id="s4" onclick="nextDispVideo()">
+  <h1 class="screen-title">Disponibilidad de hospedaje durante el mundial</h1>
+  <div style="position:relative;width:88vw;flex:1;min-height:0;background:#FFFAF0;border-radius:6px;overflow:hidden;">
+    <video id="dv0" src="disp1.webm" playsinline preload="auto" muted
+      style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;transition:opacity .05s"></video>
+    <video id="dv1" src="disp2.webm" playsinline preload="auto" muted
+      style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;transition:opacity .05s"></video>
+    <video id="dv2" src="disp3.webm" playsinline preload="auto" muted
+      style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;transition:opacity .05s"></video>
+  </div>
+</div>
+
+<script>
+const ALL_SCREENS = ['s-cover','s0','s1','s2','s3','s4'];
+const TOTAL_DOTS  = 5;
+
+// Pairs that should cut instead of crossfade: [from, to] as ALL_SCREENS indices
+const CUT_PAIRS = [[1, 2], [2, 3], [3, 4]]; // s0→s1 (video1→2), s1→s2 (zoom in→out), s2→s3 (zoom out→next)
+
+let cur = 0;
+let transitioning = false;
+
+const vids = [0,1,2,3].map(i => document.getElementById('v'+i));
+
+function isCutTransition(from, to) {
+  return CUT_PAIRS.some(([a,b]) => a === from && b === to);
+}
+
+/* ── DOTS ── */
+function buildDots() {
+  document.getElementById('dots').innerHTML =
+    Array.from({length: TOTAL_DOTS}, (_,i) =>
+      `<div class="pdot" id="pd${i}" onclick="goTo(${i+1})"></div>`
+    ).join('');
+}
+
+function updateDots(idx) {
+  const ci = idx - 1;
+  for (let i = 0; i < TOTAL_DOTS; i++) {
+    const d = document.getElementById('pd'+i);
+    if (d) d.className = 'pdot'+(i===ci?' active':i<ci?' done':'');
+  }
+  const btn  = document.getElementById('nav-btn');
+  const dots = document.getElementById('dots');
+  if (idx === 0) {
+    btn.classList.remove('show');
+    dots.classList.remove('show');
+  } else {
+    btn.classList.add('show');
+    dots.classList.add('show');
+    btn.textContent = idx === ALL_SCREENS.length - 1 ? '↺' : '›';
+  }
+}
+
+/* ── VIDEOS ── */
+function stopAll() {
+  vids.forEach(v => { v.pause(); v.currentTime = 0; });
+  if (typeof resetDispVideos === 'function') resetDispVideos();
+}
+
+function playVideo(screenIdx) {
+  const vi = screenIdx - 1;
+  if (vi < 0 || vi >= vids.length) return;
+  vids[vi].currentTime = 0;
+  vids[vi].play().catch(() => {});
+}
+
+/* ── DISP VIDEOS (screen s4) ── */
+const dispVids = [0,1,2].map(i => document.getElementById('dv'+i));
+let dispStep = -1; // -1 = none shown yet
+
+function resetDispVideos() {
+  dispStep = -1;
+  dispVids.forEach(v => {
+    v.pause(); v.currentTime = 0;
+    v.style.opacity = '0';
+  });
+}
+
+function nextDispVideo() {
+  if (dispStep >= 2) return; // all shown
+  dispStep++;
+  // Hide previous
+  if (dispStep > 0) {
+    // keep previous visible (stacked), just show new on top
+  }
+  const v = dispVids[dispStep];
+  v.style.opacity = '1';
+  v.currentTime = 0;
+  v.play().catch(() => {});
+}
+
+/* ── NAVIGATION ── */
+function goTo(i) {
+  if (transitioning || i === cur) return;
+  transitioning = true;
+
+  const prev = cur;
+  cur = i;
+  const cut = isCutTransition(prev, cur);
+
+  const prevEl = document.getElementById(ALL_SCREENS[prev]);
+  const nextEl = document.getElementById(ALL_SCREENS[cur]);
+
+  if (cut) {
+    // Instantaneous: no fade at all
+    prevEl.classList.add('cut-out');
+    nextEl.classList.add('cut-in');
+
+    prevEl.classList.remove('active');
+    stopAll();
+    nextEl.classList.add('active');
+    updateDots(cur);
+    playVideo(cur);
+
+    // Clean up helper classes after a tick
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        prevEl.classList.remove('cut-out');
+        nextEl.classList.remove('cut-in');
+        transitioning = false;
+      });
+    });
+
+  } else {
+    // Slow crossfade
+    prevEl.classList.remove('active');
+
+    setTimeout(() => {
+      stopAll();
+      nextEl.classList.add('active');
+      updateDots(cur);
+      setTimeout(() => {
+        playVideo(cur);
+        if (cur === 5) { setTimeout(() => nextDispVideo(), 200); }
+        transitioning = false;
+      }, 300);
+    }, 900);
+  }
+}
+
+function advance() {
+  goTo(cur === ALL_SCREENS.length - 1 ? 0 : cur + 1);
+}
+
+/* ── INIT ── */
+buildDots();
+updateDots(0);
+</script>
+</body>
+</html>
